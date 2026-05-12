@@ -1,65 +1,62 @@
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const mysql = require('mysql2');
+const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ---------------- HOME ROUTE ---------------- */
-app.get("/", (req, res) => {
-  res.send("CRM Backend is LIVE ");
+// MySQL Connection
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',          
+  password: 'yourpassword', 
+  database: 'crm1'
 });
 
-/* ---------------- DEMO LEADS ---------------- */
-app.get("/api/leads", (req, res) => {
-  res.json([
-    {
-      id: 1,
-      name: "Neelima Demo Lead",
-      email: "demo@gmail.com",
-      source: "Website",
-      status: "New",
-      notes: "Sample data working"
-    },
-    {
-      id: 2,
-      name: "Test Customer",
-      email: "test@gmail.com",
-      source: "Instagram",
-      status: "Contacted",
-      notes: "Demo CRM entry"
-    }
-  ]);
+db.connect(err => {
+  if (err) {
+    console.error('MySQL connection failed:', err);
+    return;
+  }
+  console.log('MySQL Connected');
 });
 
-/* ---------------- ADD LEAD (SAFE) ---------------- */
-app.post("/api/leads", (req, res) => {
-  res.json({
-    message: "Demo mode - Lead received",
-    data: req.body
+//  Add lead
+app.post('/api/leads', (req, res) => {
+  const { name, email, source, notes } = req.body;
+  const sql = 'INSERT INTO leads (name,email,source,status,notes) VALUES (?,?,?,?,?)';
+  db.query(sql, [name, email, source, 'New', notes], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Failed to add lead' });
+    res.json({ id: result.insertId, name, email, source, status: 'New', notes });
   });
 });
 
-/* ---------------- UPDATE LEAD (SAFE) ---------------- */
-app.put("/api/leads/:id", (req, res) => {
-  res.json({
-    message: "Demo mode - Update success",
-    id: req.params.id,
-    status: req.body.status
+//  Get all leads
+app.get('/api/leads', (req, res) => {
+  db.query('SELECT * FROM leads', (err, results) => {
+    if (err) return res.status(500).json({ error: 'Failed to fetch leads' });
+    res.json(results);
   });
 });
 
-/* ---------------- DELETE LEAD (SAFE) ---------------- */
-app.delete("/api/leads/:id", (req, res) => {
-  res.json({
-    message: "Demo mode - Delete success",
-    id: req.params.id
+// Update status
+app.put('/api/leads/:id', (req, res) => {
+  const { status } = req.body;
+  db.query('UPDATE leads SET status=? WHERE id=?', [status, req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: 'Failed to update status' });
+    res.json({ message: 'Status updated' });
   });
 });
 
-/* ---------------- SERVER START ---------------- */
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(" Server running on port " + PORT);
+//  Delete lead
+app.delete('/api/leads/:id', (req, res) => {
+  db.query('DELETE FROM leads WHERE id=?', [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: 'Failed to delete lead' });
+    res.json({ message: 'Lead deleted' });
+  });
 });
+
+// Server Start
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

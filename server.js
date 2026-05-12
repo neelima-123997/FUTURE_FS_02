@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ---------------- DATABASE ---------------- */
+/* ---------------- DATABASE CONNECTION ---------------- */
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -14,19 +14,32 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME
 });
 
-/* SAFE CONNECT (DO NOT CRASH APP) */
 db.connect((err) => {
   if (err) {
-    console.log("DB NOT CONNECTED:", err.message);
+    console.error(" MySQL Connection Failed:", err.message);
   } else {
-    console.log(" MySQL Connected");
+    console.log("MySQL Connected");
   }
 });
 
-/* ---------------- HEALTH CHECK ---------------- */
+/* ---------------- HOME ---------------- */
 app.get("/", (req, res) => {
-  res.send("CRM Backend Running ");
+  res.send("CRM Backend Running (Real Version)");
 });
+
+/* ---------------- CREATE TABLE (optional safety) ---------------- */
+const createTable = `
+CREATE TABLE IF NOT EXISTS leads (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255),
+  email VARCHAR(255),
+  source VARCHAR(100),
+  status VARCHAR(50),
+  notes TEXT
+);
+`;
+
+db.query(createTable);
 
 /* ---------------- ADD LEAD ---------------- */
 app.post('/api/leads', (req, res) => {
@@ -40,7 +53,7 @@ app.post('/api/leads', (req, res) => {
   db.query(sql, [name, email, source, 'New', notes], (err, result) => {
     if (err) {
       console.log(err);
-      return res.status(500).json({ error: "DB error (add lead)" });
+      return res.status(500).json({ error: "Failed to add lead" });
     }
 
     res.json({
@@ -48,24 +61,24 @@ app.post('/api/leads', (req, res) => {
       name,
       email,
       source,
-      status: 'New',
+      status: "New",
       notes
     });
   });
 });
 
-/* ---------------- GET LEADS (SAFE) ---------------- */
+/* ---------------- GET LEADS ---------------- */
 app.get('/api/leads', (req, res) => {
   db.query('SELECT * FROM leads', (err, results) => {
     if (err) {
       console.log(err);
-      return res.json([]); // IMPORTANT: no crash
+      return res.status(500).json({ error: "Failed to fetch leads" });
     }
     res.json(results);
   });
 });
 
-/* ---------------- UPDATE STATUS ---------------- */
+/* ---------------- UPDATE LEAD ---------------- */
 app.put('/api/leads/:id', (req, res) => {
   const { status } = req.body;
 
@@ -75,9 +88,9 @@ app.put('/api/leads/:id', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({ error: "DB error (update)" });
+        return res.status(500).json({ error: "Failed to update lead" });
       }
-      res.json({ message: "Status updated" });
+      res.json({ message: "Lead updated" });
     }
   );
 });
@@ -90,7 +103,7 @@ app.delete('/api/leads/:id', (req, res) => {
     (err) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({ error: "DB error (delete)" });
+        return res.status(500).json({ error: "Failed to delete lead" });
       }
       res.json({ message: "Lead deleted" });
     }
@@ -101,5 +114,5 @@ app.delete('/api/leads/:id', (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(" Server running on port " + PORT);
+  console.log("🚀 Server running on port " + PORT);
 });

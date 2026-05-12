@@ -1,13 +1,12 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MySQL Connection 
+/* ---------------- DATABASE ---------------- */
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -15,22 +14,34 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME
 });
 
-db.connect(err => {
+/* SAFE CONNECT (DO NOT CRASH APP) */
+db.connect((err) => {
   if (err) {
-    console.error('MySQL connection failed:', err);
-    return;
+    console.log("DB NOT CONNECTED:", err.message);
+  } else {
+    console.log(" MySQL Connected");
   }
-  console.log('MySQL Connected');
 });
 
-// Routes
+/* ---------------- HEALTH CHECK ---------------- */
+app.get("/", (req, res) => {
+  res.send("CRM Backend Running ");
+});
+
+/* ---------------- ADD LEAD ---------------- */
 app.post('/api/leads', (req, res) => {
   const { name, email, source, notes } = req.body;
 
-  const sql = 'INSERT INTO leads (name,email,source,status,notes) VALUES (?,?,?,?,?)';
+  const sql = `
+    INSERT INTO leads (name, email, source, status, notes)
+    VALUES (?, ?, ?, ?, ?)
+  `;
 
   db.query(sql, [name, email, source, 'New', notes], (err, result) => {
-    if (err) return res.status(500).json({ error: 'Failed to add lead' });
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ error: "DB error (add lead)" });
+    }
 
     res.json({
       id: result.insertId,
@@ -43,36 +54,52 @@ app.post('/api/leads', (req, res) => {
   });
 });
 
+/* ---------------- GET LEADS (SAFE) ---------------- */
 app.get('/api/leads', (req, res) => {
   db.query('SELECT * FROM leads', (err, results) => {
-    if (err) return res.status(500).json({ error: 'Failed to fetch leads' });
+    if (err) {
+      console.log(err);
+      return res.json([]); // IMPORTANT: no crash
+    }
     res.json(results);
   });
 });
 
+/* ---------------- UPDATE STATUS ---------------- */
 app.put('/api/leads/:id', (req, res) => {
   const { status } = req.body;
 
-  db.query('UPDATE leads SET status=? WHERE id=?',
+  db.query(
+    'UPDATE leads SET status=? WHERE id=?',
     [status, req.params.id],
     (err) => {
-      if (err) return res.status(500).json({ error: 'Failed to update status' });
-      res.json({ message: 'Status updated' });
-    });
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "DB error (update)" });
+      }
+      res.json({ message: "Status updated" });
+    }
+  );
 });
 
+/* ---------------- DELETE LEAD ---------------- */
 app.delete('/api/leads/:id', (req, res) => {
-  db.query('DELETE FROM leads WHERE id=?',
+  db.query(
+    'DELETE FROM leads WHERE id=?',
     [req.params.id],
     (err) => {
-      if (err) return res.status(500).json({ error: 'Failed to delete lead' });
-      res.json({ message: 'Lead deleted' });
-    });
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "DB error (delete)" });
+      }
+      res.json({ message: "Lead deleted" });
+    }
+  );
 });
 
-// IMPORTANT FIX (Railway needs this)
+/* ---------------- SERVER START ---------------- */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log(" Server running on port " + PORT);
 });

@@ -1,16 +1,20 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve frontend files
+app.use(express.static(path.join(__dirname, 'public')));
+
 // MySQL Connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',         
-  password: 'Neelima@2007', 
+  user: 'root',
+  password: 'Neelima@2007',
   database: 'crm1'
 });
 
@@ -22,7 +26,7 @@ db.connect(err => {
   console.log('MySQL Connected');
 });
 
-
+// Add Lead
 app.post('/api/leads', (req, res) => {
   const { name, email, source, notes } = req.body;
   const sql = 'INSERT INTO leads (name,email,source,status,notes) VALUES (?,?,?,?,?)';
@@ -32,7 +36,7 @@ app.post('/api/leads', (req, res) => {
   });
 });
 
-
+// Get Leads
 app.get('/api/leads', (req, res) => {
   db.query('SELECT * FROM leads', (err, results) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch leads' });
@@ -40,7 +44,7 @@ app.get('/api/leads', (req, res) => {
   });
 });
 
-
+// Update Status
 app.put('/api/leads/:id', (req, res) => {
   const { status } = req.body;
   db.query('UPDATE leads SET status=? WHERE id=?', [status, req.params.id], (err) => {
@@ -49,6 +53,7 @@ app.put('/api/leads/:id', (req, res) => {
   });
 });
 
+// Delete Lead
 app.delete('/api/leads/:id', (req, res) => {
   db.query('DELETE FROM leads WHERE id=?', [req.params.id], (err) => {
     if (err) return res.status(500).json({ error: 'Failed to delete lead' });
@@ -58,4 +63,4 @@ app.delete('/api/leads/:id', (req, res) => {
 
 // Server Start
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

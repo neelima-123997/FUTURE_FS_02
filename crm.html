@@ -13,7 +13,7 @@
   </header>
 
   <div class="container">
-    
+    <!-- Search + Filter + Export -->
     <div class="search-section">
       <input type="text" id="searchInput" placeholder="Search by name or email">
       <select id="statusFilter">
@@ -51,7 +51,6 @@
           <option value="Facebook">Facebook</option>
           <option value="Email Campaign">Email Campaign</option>
           <option value="Phone Call">Phone Call</option>
-          <option value="Instagram Ads">Instagram Ads</option>
         </select>
         <textarea id="notes" placeholder="Notes"></textarea>
         <button type="submit">Add Lead</button>
@@ -126,7 +125,7 @@
       loadLeads();
     }
 
-    
+    // Search + Filter
     searchInput.addEventListener('input', applyFilters);
     statusFilter.addEventListener('change', applyFilters);
 
@@ -140,7 +139,7 @@
       renderLeads(filtered);
     }
 
-   
+    //  Export to CSV
     exportBtn.addEventListener('click', () => {
       let csv = "Name,Email,Source,Status,Notes\n";
       allLeads.forEach(l => {

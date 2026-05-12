@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CRM Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header Section -->
+  <header class="header">
+    <h1>CRM Dashboard</h1>
+    <p>Client Lead Management System</p>
+  </header>
+
+  <div class="container">
+    
+    <div class="search-section">
+      <input type="text" id="searchInput" placeholder="Search by name or email">
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option value="New">New</option>
+        <option value="Contacted">Contacted</option>
+        <option value="Converted">Converted</option>
+      </select>
+      <button id="exportBtn">Export CSV</button>
+    </div>
+
+    <!-- Leads Table -->
+    <div class="table-section">
+      <h2>Leads</h2>
+      <table id="leadsTable">
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>Source</th><th>Status</th><th>Notes</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Add Lead Form -->
+    <div class="form-section">
+      <h2>Add Lead</h2>
+      <form id="leadForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <select id="source" required>
+          <option value="Website">Website</option>
+          <option value="Referral">Referral</option>
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Email Campaign">Email Campaign</option>
+          <option value="Phone Call">Phone Call</option>
+          <option value="Instagram Ads">Instagram Ads</option>
+        </select>
+        <textarea id="notes" placeholder="Notes"></textarea>
+        <button type="submit">Add Lead</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('leadForm');
+    const tableBody = document.querySelector('#leadsTable tbody');
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const exportBtn = document.getElementById('exportBtn');
+    let allLeads = [];
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const lead = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        source: document.getElementById('source').value,
+        notes: document.getElementById('notes').value
+      };
+      await fetch('http://localhost:5000/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lead)
+      });
+      form.reset();
+      loadLeads();
+    });
+
+    async function loadLeads() {
+      const res = await fetch('http://localhost:5000/api/leads');
+      allLeads = await res.json();
+      renderLeads(allLeads);
+    }
+
+    function renderLeads(leads) {
+      tableBody.innerHTML = '';
+      leads.forEach(l => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${l.name}</td>
+          <td>${l.email}</td>
+          <td>${l.source}</td>
+          <td>
+            <select onchange="updateStatus(${l.id}, this.value)">
+              <option ${l.status==='New'?'selected':''}>New</option>
+              <option ${l.status==='Contacted'?'selected':''}>Contacted</option>
+              <option ${l.status==='Converted'?'selected':''}>Converted</option>
+            </select>
+          </td>
+          <td>${l.notes || ''}</td>
+          <td><button onclick="deleteLead(${l.id})">Delete</button></td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    async function updateStatus(id, status) {
+      await fetch(`http://localhost:5000/api/leads/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      loadLeads();
+    }
+
+    async function deleteLead(id) {
+      await fetch(`http://localhost:5000/api/leads/${id}`, { method: 'DELETE' });
+      loadLeads();
+    }
+
+    
+    searchInput.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+
+    function applyFilters() {
+      const keyword = searchInput.value.toLowerCase();
+      const statusVal = statusFilter.value;
+      const filtered = allLeads.filter(l =>
+        (l.name.toLowerCase().includes(keyword) || l.email.toLowerCase().includes(keyword)) &&
+        (statusVal === '' || l.status === statusVal)
+      );
+      renderLeads(filtered);
+    }
+
+   
+    exportBtn.addEventListener('click', () => {
+      let csv = "Name,Email,Source,Status,Notes\n";
+      allLeads.forEach(l => {
+        csv += `${l.name},${l.email},${l.source},${l.status},${l.notes || ''}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "leads.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    loadLeads();
+  </script>
+</body>
+</html>

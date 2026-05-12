@@ -5,7 +5,7 @@ body {
   margin: 0;
 }
 
-
+/* Header Styling */
 .header {
   text-align: center;
   background: linear-gradient(90deg, #5a2d82, #8a4dcf);
@@ -32,7 +32,7 @@ body {
   padding: 20px;
 }
 
-
+/* Search + Filter + Export */
 .search-section {
   display: flex;
   justify-content: flex-end;

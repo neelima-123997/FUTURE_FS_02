@@ -1,59 +1,79 @@
-# FUTURE_FS_02
+# CRM Lead Management System
 
-CRM Dashboard Project
+This is a simple full-stack CRM web application used to manage client leads coming from contact forms.
 
-This project is a simple Customer Relationship Management (CRM) system developed to manage and track client leads in an organized way.
-
----
-
-## Live Demo
-https://neelima-123997.github.io/FUTURE_FS_02/
+It helps to store, track, and manage leads in an easy way.
 
 ---
 
-## Technologies Used
-- HTML
-- CSS
-- JavaScript
-- Node.js
-- Express.js
-- MySQL
+## Tech Stack
+
+HTML, CSS, JavaScript, Node.js, Express.js, MySQL
 
 ---
 
 ## Project Description
-This CRM application helps in managing customer leads easily.  
-It allows users to add new leads, update their status, and delete unwanted records.  
-All data is stored in a database and fetched using API calls.
+
+This CRM project is used to manage customer leads.
+
+You can:
+- Add new leads
+- View all leads in a table
+- Update lead status (New / Contacted / Converted)
+- Delete leads
+- Search leads by name or email
+- Filter leads by status
+- Export leads as CSV file
 
 ---
 
-## Features
-- Add new customer leads  
-- View all leads in a table format  
-- Update lead status (New, Contacted, Converted)  
-- Delete leads from system  
-- Search leads by name or email  
-- Filter leads by status  
-- Export lead data to CSV file  
+## Project Structure
+
+index.html → Frontend UI + JavaScript  
+style.css → Styling  
+server.js → Backend API (Node.js + Express + MySQL)
 
 ---
 
-## What I learned
-While building this project, I learned how frontend and backend work together.  
-I also understood how APIs connect with a database and how CRUD operations work in real projects.
+## How to Run This Project
+
+First, clone this repository from GitHub  
+git clone https://github.com/your-username/crm-project.git  
+
+Go inside the project folder  
+cd crm-project  
+
+Install all required dependencies  
+npm install  
+
+Start the backend server  
+node server.js  
+
+Open the frontend  
+Open index.html in your browser  
+OR  
+Use Live Server in VS Code (recommended)
 
 ---
 
-## Project Type
-Full Stack Development Internship Task 2
+## Important Notes
+
+- Backend runs only on localhost  
+- MySQL database must be running before starting server  
+- Check port number in server.js if API is not working  
 
 ---
 
-## Note
-This project is built for learning purpose during internship training.
+## What I Learned
+
+- CRUD operations (Create, Read, Update, Delete)
+- REST API development using Express.js
+- MySQL database integration
+- Frontend and backend communication using Fetch API
+- Real-world CRM workflow handling
 
 ---
 
 ## Author
+
 Neelima

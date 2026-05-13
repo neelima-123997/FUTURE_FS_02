@@ -35,13 +35,19 @@ server.js → Backend API (Node.js + Express + MySQL)
 
 ---
 
-## How to Run This Project
+## 🌐 Live Demo
+
+👉 [Click Here to View Live Project](https://neelima-123997.github.io/FUTURE_FS_02/)
+
+---
+
+## 🚀 How to Run This Project
 
 First, clone this repository from GitHub  
-git clone https://github.com/your-username/crm-project.git  
+git clone https://github.com/neelima-123997/FUTURE_FS_02.git  
 
 Go inside the project folder  
-cd crm-project  
+cd FUTURE_FS_02  
 
 Install all required dependencies  
 npm install  
@@ -56,11 +62,12 @@ Use Live Server in VS Code (recommended)
 
 ---
 
-## Important Notes
+## ⚠️ Important Notes
 
 - Backend runs only on localhost  
 - MySQL database must be running before starting server  
 - Check port number in server.js if API is not working  
+- Live demo shows only frontend (GitHub Pages)
 
 ---
 

@@ -74,7 +74,7 @@
         source: document.getElementById('source').value,
         notes: document.getElementById('notes').value
       };
-      await fetch('http://localhost:5000/api/leads', {
+      await fetch('http://localhost:3000/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(lead)
@@ -84,7 +84,7 @@
     });
 
     async function loadLeads() {
-      const res = await fetch('http://localhost:5000/api/leads');
+      const res = await fetch('http://localhost:3000/api/leads');
       allLeads = await res.json();
       renderLeads(allLeads);
     }
@@ -112,7 +112,7 @@
     }
 
     async function updateStatus(id, status) {
-      await fetch(`http://localhost:5000/api/leads/${id}`, {
+      await fetch(`http://localhost:3000/api/leads/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
@@ -121,7 +121,7 @@
     }
 
     async function deleteLead(id) {
-      await fetch(`http://localhost:5000/api/leads/${id}`, { method: 'DELETE' });
+      await fetch(`http://localhost:3000/api/leads/${id}`, { method: 'DELETE' });
       loadLeads();
     }
 
@@ -139,7 +139,7 @@
       renderLeads(filtered);
     }
 
-    //  Export to CSV
+    // Export to CSV
     exportBtn.addEventListener('click', () => {
       let csv = "Name,Email,Source,Status,Notes\n";
       allLeads.forEach(l => {
